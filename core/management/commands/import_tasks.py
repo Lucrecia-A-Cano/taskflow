@@ -1,8 +1,17 @@
 import csv
 import json
+import logging
 import xml.etree.ElementTree as ET
 from django.core.management.base import BaseCommand
 from core.models import Task
+
+# Logger que guarda los mensajes en el archivo import.log
+logger = logging.getLogger("import_tasks")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.FileHandler("import.log", encoding="utf-8")
+    handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+    logger.addHandler(handler)
 
 
 class Command(BaseCommand):
@@ -13,6 +22,7 @@ class Command(BaseCommand):
         total += self._import_json("data/tasks_provider_a.json", source="proveedor_a")
         total += self._import_csv("data/tasks_provider_b.csv", source="proveedor_b")
         total += self._import_xml("data/tasks_provider_c.xml", source="proveedor_c")
+        total += self._import_json("data/tasks_provider_d.json", source="proveedor_d")
         self.stdout.write(self.style.SUCCESS(f"Importación finalizada: {total} tareas cargadas"))
 
     def _import_json(self, path, source):
@@ -24,7 +34,7 @@ class Command(BaseCommand):
                 self._crear_task(item, source)
                 count += 1
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            self.stderr.write(self.style.ERROR(f"Error importando {path}: {e}"))
+            logger.error(f"Error importando {path}: {e}")
         return count
 
     def _import_csv(self, path, source):
@@ -36,7 +46,7 @@ class Command(BaseCommand):
                     self._crear_task(row, source)
                     count += 1
         except FileNotFoundError as e:
-            self.stderr.write(self.style.ERROR(f"Error importando {path}: {e}"))
+            logger.error(f"Error importando {path}: {e}")
         return count
 
     def _import_xml(self, path, source):
@@ -52,12 +62,12 @@ class Command(BaseCommand):
                 self._crear_task(item, source)
                 count += 1
         except (FileNotFoundError, ET.ParseError) as e:
-            self.stderr.write(self.style.ERROR(f"Error importando {path}: {e}"))
+            logger.error(f"Error importando {path}: {e}")
         return count
 
     def _crear_task(self, item, source):
         if not item.get("title"):
-            self.stderr.write(self.style.WARNING("Item sin título, se ignora"))
+            logger.warning(f"Item sin título, se ignora (proveedor: {source}): {item}")
             return
         Task.objects.create(
             title=item["title"],
@@ -65,4 +75,3 @@ class Command(BaseCommand):
             status=item.get("status", "pendiente"),
             source=source,
         )
-        
