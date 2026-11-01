@@ -1,0 +1,149 @@
+PRUEBAS DE CODIGOS DE ESTADO HTTP - TaskFlow API
+Clase 4 - Programacion IV
+Alumna: Lucrecia Cano
+Fecha de prueba: ____/____/2026
+
+Servidor: python manage.py runserver (http://127.0.0.1:8000)
+Herramienta: curl (CMD de Windows, cada comando en una sola linea)
+
+====================================================================
+CASO 1: 200 OK (lectura exitosa)
+====================================================================
+Comando:
+curl -i http://127.0.0.1:8000/api/tasks/
+
+Respuesta real obtenida:
+
+HTTP/1.1 200 OK
+Date: Sun, 01 Nov 2026 14:06:37 GMT
+Server: WSGIServer/0.2 CPython/3.13.15
+Content-Type: application/json
+Vary: Accept, Cookie
+Allow: GET, POST, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 1565
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+
+[{"id":1,"project":1,"title":"Crear modelos Project, Task y Tag","description":"","priority":"alta","status":"completada","due_date":null,"tags":[{"id":1,"name":"backend"}],"created_at":"2026-11-01T03:56:46.469499Z"},{"id":2,"project":1,"title":"Configurar serializers de DRF","description":"","priority":"alta","status":"en_progreso","due_date":null,"tags":[{"id":1,"name":"backend"},{"id":2,"name":"urgente"}],"created_at":"2026-11-01T03:57:51.467413Z"},{"id":3,"project":1,"title":"Escribir README del proyecto","description":"","priority":"baja","status":"pendiente","due_date":null,"tags":[{"id":3,"name":"documentación"}],"created_at":"2026-11-01T03:58:26.542130Z"},{"id":4,"project":1,"title":"Agregar endpoint de detalle","description":"","priority":"media","status":"pendiente","due_date":null,"tags":[{"id":1,"name":"backend"}],"created_at":"2026-11-01T03:59:20.502979Z"},{"id":5,"project":2,"title":"Diseñar wireframes de la home","description":"","priority":"alta","status":"completada","due_date":null,"tags":[{"id":4,"name":"frontend"}],"created_at":"2026-11-01T03:59:53.375860Z"},{"id":6,"project":2,"title":"Maquetar página de contacto","description":"","priority":"media","status":"en_progreso","due_date":null,"tags":[{"id":2,"name":"urgente"},{"id":4,"name":"frontend"}],"created_at":"2026-11-01T04:00:31.863274Z"},{"id":7,"project":2,"title":"Redactar textos de “Quiénes somos”","description":"","priority":"baja","status":"pendiente","due_date":null,"tags":[{"id":3,"name":"documentación"}],"created_at":"2026-11-01T04:01:05.282978Z"}]
+
+====================================================================
+CASO 2: 201 Created (creacion exitosa)
+====================================================================
+Comando:
+curl -i -X POST http://127.0.0.1:8000/api/tasks/ -H "Content-Type: application/json" -d "{\"project\": 1, \"title\": \"Tarea curl\", \"due_date\": \"2026-12-15\"}"
+
+Respuesta real obtenida:
+
+HTTP/1.1 201 Created
+Date: Sun, 01 Nov 2026 14:40:46 GMT
+Server: WSGIServer/0.2 CPython/3.13.15
+Content-Type: application/json
+Vary: Accept, Cookie
+Allow: GET, POST, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 176
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+
+{"id":10,"project":1,"title":"Tarea curl","description":"","priority":"media","status":"pendiente","due_date":"2026-12-15","tags":[],"created_at":"2026-11-01T14:40:46.529760Z"}
+
+====================================================================
+CASO 3: 204 No Content (eliminacion exitosa)
+====================================================================
+Comando (reemplazar ID por el id obtenido en el caso 2):
+curl -i -X DELETE http://127.0.0.1:8000/api/tasks/10/
+
+Respuesta real obtenida:
+
+HTTP/1.1 204 No Content
+Date: Sun, 01 Nov 2026 14:48:20 GMT
+Server: WSGIServer/0.2 CPython/3.13.15
+Vary: Accept, Cookie
+Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 0
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+
+====================================================================
+CASO 4: 400 Bad Request (datos invalidos)
+====================================================================
+Comando:
+curl -i -X POST http://127.0.0.1:8000/api/tasks/ -H "Content-Type: application/json" -d "{\"project\": 1}"
+
+Respuesta real obtenida:
+
+HTTP/1.1 400 Bad Request
+Date: Sun, 01 Nov 2026 14:51:07 GMT
+Server: WSGIServer/0.2 CPython/3.13.15
+Content-Type: application/json
+Vary: Accept, Cookie
+Allow: GET, POST, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 61
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+
+{"error":true,"detail":{"title":["This field is required."]}}
+
+====================================================================
+CASO 5: 404 Not Found (recurso inexistente)
+====================================================================
+Comando:
+curl -i http://127.0.0.1:8000/api/tasks/999/
+
+Respuesta real obtenida:
+HTTP/1.1 404 Not Found
+Date: Sun, 01 Nov 2026 14:54:48 GMT
+Server: WSGIServer/0.2 CPython/3.13.15
+Content-Type: application/json
+Vary: Accept, Cookie
+Allow: GET, PUT, PATCH, DELETE, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 69
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+
+{"error":true,"detail":{"detail":"No Task matches the given query."}}
+
+====================================================================
+CASO 6: 500 Internal Server Error (error no controlado)
+====================================================================
+Preparacion (temporal): agregue en TaskViewSet, dentro de core/views.py,
+un metodo list que lanza una excepcion a proposito:
+
+    def list(self, request, *args, **kwargs):
+        raise Exception("prueba 500")
+
+Luego lo elimine para dejar la API funcionando.
+
+Comando:
+curl -i http://127.0.0.1:8000/api/tasks/
+
+Respuesta real obtenida:
+
+HTTP/1.1 500 Internal Server Error
+Date: Sun, 01 Nov 2026 15:04:20 GMT
+Server: WSGIServer/0.2 CPython/3.13.15
+Content-Type: application/json
+Vary: Accept, Cookie
+Allow: GET, POST, HEAD, OPTIONS
+X-Frame-Options: DENY
+Content-Length: 53
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+
+{"error":true,"detail":"Error interno del servidor."}
+
+====================================================================
+CASOS NO PROBADOS TODAVIA
+====================================================================
+401 Unauthorized y 403 Forbidden: corresponden a autenticacion y
+autorizacion, que se ven en la Unidad 3.

@@ -53,4 +53,3 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.select_related("project").prefetch_related("tags").all()
     serializer_class = TaskSerializer
-
