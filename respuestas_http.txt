@@ -1,7 +1,7 @@
 PRUEBAS DE CODIGOS DE ESTADO HTTP - TaskFlow API
 Clase 4 - Programacion IV
-Alumna: Lucrecia Cano
-Fecha de prueba: ____/____/2026
+Alumna: Lucrecia Alejandra Cano
+Fecha de prueba: 30/09/2026
 
 Servidor: python manage.py runserver (http://127.0.0.1:8000)
 Herramienta: curl (CMD de Windows, cada comando en una sola linea)
@@ -143,7 +143,8 @@ Cross-Origin-Opener-Policy: same-origin
 {"error":true,"detail":"Error interno del servidor."}
 
 ====================================================================
-CASOS NO PROBADOS TODAVIA
+CASOS:
 ====================================================================
-401 Unauthorized y 403 Forbidden: corresponden a autenticacion y
-autorizacion, que se ven en la Unidad 3.
+
+401 Unauthorized: pendiente, Clase 6 (JWT)
+403 Forbidden: pendiente, Clase 7 (permisos)
