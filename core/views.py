@@ -30,13 +30,15 @@ from django.shortcuts import get_object_or_404
 #    project = get_object_or_404(Project, pk=project_id)
 #    serializer = ProjectSerializer(project)
 #    return Response(serializer.data)
-
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, permissions, status, viewsets
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.http import JsonResponse
 from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -77,6 +79,32 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def summary(self, request, pk=None):
         project = self.get_object()
         return Response(ProjectService.project_summary(project))
+
+    @action(detail=True, methods=["post"])
+    def add_member(self, request, pk=None):
+        # get_object() ejecuta has_object_permission: como es un POST, exige ser
+        # admin del proyecto (403 si es solo miembro, 404 si ni siquiera es miembro)
+        project = self.get_object()
+
+        username = request.data.get("username")
+        role = request.data.get("role", "miembro")
+        roles_validos = [r[0] for r in ProjectMembership.ROLE_CHOICES]
+
+        if not username:
+            raise ValidationError({"username": "Este campo es obligatorio."})
+        if role not in roles_validos:
+            raise ValidationError({"role": "El rol debe ser 'admin' o 'miembro'."})
+
+        user = get_object_or_404(User, username=username)  # 404 si no existe
+
+        if MembershipService.is_member(user, project):
+            raise ValidationError("Ese usuario ya es miembro del proyecto.")  # 400
+
+        membership = ProjectMembership.objects.create(project=project, user=user, role=role)
+        return Response(
+            {"project": project.id, "user": user.username, "role": membership.role},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class TaskViewSet(viewsets.ModelViewSet):
