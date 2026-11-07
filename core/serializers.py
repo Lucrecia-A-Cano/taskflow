@@ -1,3 +1,4 @@
+import nh3 
 from datetime import date
 from rest_framework import serializers
 from .models import Project, Task, Tag
@@ -58,6 +59,8 @@ class TaskSerializer(serializers.ModelSerializer):
 
         return data
 
+    def validate_description(self, value):
+        return nh3.clean(value, tags=set())
 
 class ProjectSerializer(serializers.ModelSerializer):
     tasks = TaskSerializer(many=True, read_only=True)

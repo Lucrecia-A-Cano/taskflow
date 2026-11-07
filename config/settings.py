@@ -31,8 +31,7 @@ SECRET_KEY = 'django-insecure-+q@f0ksd9+yn!ad8uandh+f^-k7q-a1p!tfdoffu!-@d-^$7&9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 # Application definition
 
@@ -49,6 +48,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -139,7 +139,7 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "core.exceptions.custom_exception_handler",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 5,
-     "DEFAULT_FILTER_BACKENDS": [
+    "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.OrderingFilter",
         "rest_framework.filters.SearchFilter",
@@ -151,6 +151,15 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "20/minute",
+        "user": "100/minute",
+        "login": "5/minute",
+    },
 }
 
 SIMPLE_JWT = {
@@ -188,3 +197,22 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 LOGIN_REDIRECT_URL = "/api/auth/social/jwt/"
+
+# --- Seguridad (Clase 8) ---
+INSTALLED_APPS += ["corsheaders"]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://taskflow-app.com",
+]
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {"class": "logging.FileHandler", "filename": BASE_DIR / "security.log"},
+    },
+    "loggers": {
+        "security": {"handlers": ["file"], "level": "WARNING"},
+    },
+}
