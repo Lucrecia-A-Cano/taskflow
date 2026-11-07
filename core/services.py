@@ -4,6 +4,7 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from .models import Task
 from .repositories import TaskRepository
+from django.db.models import Count
 
 
 class TaskService:
@@ -49,3 +50,17 @@ class HolidayService:
     @classmethod
     def is_holiday(cls, some_date) -> bool:
         return str(some_date) in cls.get_holidays(some_date.year)
+
+class ProjectService:
+    ESTADOS = ["pendiente", "en_progreso", "completada"]
+
+    @staticmethod
+    def project_summary(project) -> dict:
+        # Una sola consulta: agrupa las tareas por estado y las cuenta
+        counts = project.tasks.values("status").annotate(total=Count("id"))
+
+        # Arrancamos con los tres estados en 0, para que siempre aparezcan
+        summary = {estado: 0 for estado in ProjectService.ESTADOS}
+        for row in counts:
+            summary[row["status"]] = row["total"]
+        return summary

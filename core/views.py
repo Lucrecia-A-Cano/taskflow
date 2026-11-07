@@ -38,7 +38,7 @@ from rest_framework.response import Response
 from .models import Project
 from .repositories import TaskRepository
 from .serializers import ProjectSerializer, TaskSerializer
-from .services import TaskService
+from .services import ProjectService, TaskService
 
 
 def health_check(request):
@@ -52,6 +52,11 @@ def version(request):
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all().order_by("id")
     serializer_class = ProjectSerializer
+
+    @action(detail=True, methods=["get"])
+    def summary(self, request, pk=None):
+        project = self.get_object()
+        return Response(ProjectService.project_summary(project))
 
 
 class TaskViewSet(viewsets.ModelViewSet):
