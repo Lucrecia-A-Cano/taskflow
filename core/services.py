@@ -2,7 +2,7 @@ import requests
 from django.core.cache import cache
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
-from .models import Task
+from .models import Project, ProjectMembership, Task
 from .repositories import TaskRepository
 from django.db.models import Count
 
@@ -64,3 +64,16 @@ class ProjectService:
         for row in counts:
             summary[row["status"]] = row["total"]
         return summary
+
+class MembershipService:
+    @staticmethod
+    def is_member(user, project) -> bool:
+        return ProjectMembership.objects.filter(project=project, user=user).exists()
+
+    @staticmethod
+    def is_admin(user, project) -> bool:
+        return ProjectMembership.objects.filter(project=project, user=user, role="admin").exists()
+
+    @staticmethod
+    def projects_for(user):
+        return Project.objects.filter(memberships__user=user).distinct().order_by("id")
