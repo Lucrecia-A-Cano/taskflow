@@ -1,5 +1,7 @@
 import json
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+from .models import Project
 
 
 class TaskNotificationConsumer(AsyncWebsocketConsumer):
@@ -7,7 +9,14 @@ class TaskNotificationConsumer(AsyncWebsocketConsumer):
         self.project_id = self.scope["url_route"]["kwargs"]["project_id"]
         self.group_name = f"project_{self.project_id}"
 
-        # Nos unimos a un "grupo" (lo profundizamos en la Clase 10)
+        # El ORM es sincrónico: lo ejecutamos en otro hilo para no bloquear el bucle de eventos
+        existe = await database_sync_to_async(
+            Project.objects.filter(id=self.project_id).exists
+        )()
+        if not existe:
+            await self.close()
+            return
+
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
 
@@ -16,9 +25,7 @@ class TaskNotificationConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        # Por ahora, hacemos "echo" del mensaje recibido
         await self.send(text_data=json.dumps({"echo": data}))
 
     async def task_notification(self, event):
-        # Este método lo llama Channels cuando llega un mensaje al grupo (Clase 10)
         await self.send(text_data=json.dumps(event["payload"]))
