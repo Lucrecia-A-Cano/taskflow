@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>TaskFlow</title>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 16px; }
+    input, select, button { padding: 8px; margin: 4px 0; }
+    #tasks li { margin: 6px 0; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>TaskFlow</h1>
+
+  <section id="login-box">
+    <h2>Ingresar</h2>
+    <input id="username" placeholder="usuario">
+    <input id="password" type="password" placeholder="contraseña">
+    <button onclick="login()">Ingresar</button>
+    <p id="login-error" class="error"></p>
+  </section>
+
+  <section id="app-box" style="display:none;">
+    <h2>Mis tareas</h2>
+    <ul id="tasks"></ul>
+    <select id="project"></select>
+    <input id="new-title" placeholder="Nueva tarea">
+    <button onclick="createTask()">Agregar</button>
+    <p id="app-error" class="error"></p>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
