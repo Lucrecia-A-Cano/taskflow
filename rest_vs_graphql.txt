@@ -1,0 +1,13 @@
+Tarea 2: comparación entre REST y GraphQL
+-Por ejemplo: una API pública de TaskFlow para que otros sistemas consulten el estado de un proyecto, o el GET /api/health/. 
+Porque, cada recurso tiene su URL y se puede cachear de forma nativa;
+los códigos de estado HTTP (200, 404, 429) comunican el resultado sin tener que abrir el cuerpo;
+es simple de entender, probar con curl y documentar.
+
+-Un caso para GraphQL. Un cliente con necesidades de datos distintas en cada pantalla: 
+por ejemplo, una app móvil donde la pantalla de inicio muestra el nombre del proyecto con solo el título y el estado de sus tareas, 
+y otra pantalla muestra el detalle completo de una tarea con sus etiquetas.
+
+Porque, evita el over-fetching (traer campos que no se usan) y el under-fetching (hacer varias peticiones para armar una pantalla);
+el cliente decide qué campos pide, sin necesidad de crear un endpoint REST a medida por cada pantalla;
+todo viaja por una sola URL y los datos relacionados vienen anidados en una sola petición.
