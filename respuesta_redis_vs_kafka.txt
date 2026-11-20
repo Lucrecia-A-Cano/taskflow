@@ -1,0 +1,16 @@
+Redis vs. Kafka
+
+-Redis pub/sub reparte cada mensaje a quienes están conectados en ese momento, y no guarda nada. 
+Si alguien estaba desconectado, se pierde el aviso (garantía “como máximo una vez”). 
+Es muy rápido y simple.
+
+-Kafka es un registro distribuido de eventos que se guarda por días o meses. 
+Los consumidores pueden volver a leer eventos viejos y cada uno lleva su propia posición de lectura. 
+Está pensado para volúmenes enormes, analítica y sistemas que “releen” la historia. 
+A cambio, es mucho más complejo de operar.
+
+-Para TaskFlow, Redis alcanza: los avisos son para mostrar algo en vivo, y los datos de verdad están en la base. 
+Si un cliente se desconecta, al volver pide el estado por la API REST (consistencia eventual, Parte 3.5).
+
+-Kafka tendría sentido si hiciera falta auditar o reprocesar el historial de eventos, 
+o conectar varios servicios que consumen los mismos eventos a distinto ritmo.

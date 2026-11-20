@@ -135,12 +135,14 @@ class TaskViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if "project" in serializer.validated_data:
             self.check_project_admin(serializer.validated_data["project"])
-        serializer.save()
+        task = serializer.save()
+        NotificationService.notify_task_updated(task)
 
     @action(detail=True, methods=["post"])
     def complete(self, request, pk=None):
         task = self.get_object()
         TaskService.mark_completed(task)
+        NotificationService.notify_task_completed(task)
         return Response(self.get_serializer(task).data)
 
     @action(detail=False, methods=["get"])
